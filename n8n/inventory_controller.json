@@ -1,0 +1,577 @@
+{
+  "name": "inventory_controller",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "action"
+            },
+            {
+              "name": "id_personaje"
+            },
+            {
+              "name": "message"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -280,
+        -20
+      ],
+      "id": "167edabb-5796-43b7-9677-72b67c55dc3c",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message }}. \nid_personaje:{{ $json.id_personaje }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Eres la IA encargada exclusivamente de gestionar el inventario de los personajes. Tu tarea consiste en añadir, quitar o modificar el inventario del personaje. Y proporcionar cualquier información al respecto del inventario del personaje.\n\nPara ello usarás las herramientas que te proporciono:\n-insert_invetory es para guardar cualquier objeto nuevo en el inventario del personaje.\n-select_inventory es para consultar cualquier ítem que lleve el personaje, pero también lo usarás para determinar que id_objeto deberás usar para actualizar algún ítem del inventario o borrarlo. \n-update_inventory es para modificar cualquier objeto ya existente.\n-delete_invetory es para borrar cualquier objeto ya existente.\n-WF_rules_controller es para consultar cualquier regla sobre los objeto, su coste o sus características. Úsala para poner en la descripción las características del mismo. Por ejemplo, un arma tendrá un daño que deberás anotar.\n\n-Los personajes tienen una serie de espacios para objetos. Usando las reglas de la herramienta knave_rules debes determina si el objeto ocupa un espacio, mas de un espacio o si se pueden apilar varios en un espacio. Los objetos de un espacio serán los objetos de tamaño medio, como una espada. Los objetos pequeños, podrán apilarse varios en un mismo espacio, como monedas. Los objetos grandes como una armadura de placas ocuparan dos espacios. Usa estos ejemplos para determinar tu mismo la cantidad de espacios que ocupa un objeto.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        192,
+        -20
+      ],
+      "id": "e0f16702-0416-48a1-8974-941ee67ee700",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -80,
+        200
+      ],
+      "id": "2213de6e-f918-4005-b8a4-0abc7a06031b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "3OuBtjZj9GbiCGfk",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n    \"id_personaje\": \"1\",\n    \"id_objeto\":\"1\",\n    \"nombre_objeto\": \"Espada de Hierro\",\n    \"descripcion\":\"Una espada larga y afilada, pero tosca y sin florituras\",\n    \"espacios\": \"1\",\n    \"cantidad\": \"1\"\n  }\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        680,
+        360
+      ],
+      "id": "983d7450-eabe-4814-a4b2-3c5ffbf08724",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "name": "knave_rules",
+        "description": "Usa esta herramienta para buscar los objetos disponibles para el juego y sus características.",
+        "workflowId": {
+          "__rl": true,
+          "value": "QWaAndbRR3TTphfF",
+          "mode": "list",
+          "cachedResultName": "rules_controller"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query_rules": "query_rules",
+            "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "query_rules",
+              "displayName": "query_rules",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.1,
+      "position": [
+        540,
+        360
+      ],
+      "id": "73f6a56d-15fb-40e2-b29e-ce6c17fde30f",
+      "name": "WF_rules_controller"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "inventario_personajes",
+          "mode": "list",
+          "cachedResultName": "inventario_personajes"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id_objeto": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('id_objeto', ``, 'number') }}",
+            "espacios": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('espacios', ``, 'number') }}",
+            "cantidad": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('cantidad', ``, 'number') }}",
+            "id_personaje": "={{ $('Edit Fields').item.json.id_personaje }}",
+            "nombre_objeto": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nombre_objeto', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "id_personaje"
+          ],
+          "schema": [
+            {
+              "id": "id_objeto",
+              "displayName": "id_objeto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "id_personaje",
+              "displayName": "id_personaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nombre_objeto",
+              "displayName": "nombre_objeto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "descripcion",
+              "displayName": "descripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "espacios",
+              "displayName": "espacios",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "cantidad",
+              "displayName": "cantidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        100,
+        200
+      ],
+      "id": "fcbacbb2-16b4-4699-a344-5468db82b003",
+      "name": "update_inventory",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteTable",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "inventario_personajes",
+          "mode": "list",
+          "cachedResultName": "inventario_personajes"
+        },
+        "deleteCommand": "delete",
+        "where": {
+          "values": [
+            {
+              "column": "id_personaje",
+              "value": "={{ $('Edit Fields').item.json.id_personaje }}"
+            },
+            {
+              "column": "id_objeto",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Value', `El id_objeto es el id único del objeto que queremos borrar.`, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        260,
+        200
+      ],
+      "id": "1c70db97-1b94-414a-8626-f84900c813fa",
+      "name": "delete_inventory",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "inventario_personajes",
+          "mode": "list",
+          "cachedResultName": "inventario_personajes"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "id_personaje",
+              "value": "={{ $('Edit Fields').item.json.id_personaje }}"
+            }
+          ]
+        },
+        "sort": {
+          "values": [
+            {
+              "column": "nombre_objeto"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        400,
+        200
+      ],
+      "id": "f9de02af-6309-47ea-ba6c-116a41c317a5",
+      "name": "select_inventory",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "inventario_personajes",
+          "mode": "list",
+          "cachedResultName": "inventario_personajes"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id_objeto": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('id_objeto', ``, 'number') }}",
+            "nombre_objeto": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nombre_objeto', ``, 'string') }}",
+            "descripcion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('descripcion', `Debes de poner aquí las características de cada objeto si las tuviera. Las armas por ejemplo las tienen entre paréntesis al final.`, 'string') }}",
+            "espacios": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('espacios', `El número de espacios que ocupa.`, 'number') }}",
+            "cantidad": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('cantidad', ``, 'number') }}",
+            "id_personaje": "={{ $('Edit Fields').item.json.id_personaje }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id_objeto",
+              "displayName": "id_objeto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "id_personaje",
+              "displayName": "id_personaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_objeto",
+              "displayName": "nombre_objeto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "descripcion",
+              "displayName": "descripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "espacios",
+              "displayName": "espacios",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cantidad",
+              "displayName": "cantidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        540,
+        200
+      ],
+      "id": "c4a2efa2-bdb2-44d0-965e-4c88aa552409",
+      "name": "insert_inventory",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4ed75d30-b3b3-4099-af07-983ee11c4850",
+              "name": "id_personaje",
+              "value": "={{ $json.id_personaje }}",
+              "type": "string"
+            },
+            {
+              "id": "78c761b2-aff8-4b9f-9c8c-4c4cb07a7be8",
+              "name": "message",
+              "value": "={{ $json.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -60,
+        -20
+      ],
+      "id": "da549ba6-c43f-4068-8434-626cb531d7e9",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WF_rules_controller": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_inventory": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "delete_inventory": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "select_inventory": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "insert_inventory": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "855e3049-282a-4e11-9695-f60c7858f954",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "eb8a1f649dcbecdbbf9304f18748ad20873c85400d0ffd3afe2830b61cab1c41"
+  },
+  "id": "eisTxqYMGGAUwKPH",
+  "tags": []
+}

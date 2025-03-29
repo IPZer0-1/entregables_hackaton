@@ -1,0 +1,508 @@
+{
+  "name": "main_controller",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "main-controller",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -680,
+        100
+      ],
+      "id": "6ab015df-95ea-499e-ab9f-ca0d0497af1b",
+      "name": "Webhook",
+      "webhookId": "89c9ab50-3868-4acc-8bec-699d8aacda07"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f3f730e2-8f9c-4dbb-89c5-6940834b2e77",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "game_list",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "516eed05-207c-429f-9e36-cd7bd60ba6eb",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "load_game",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "93701916-06a4-4664-8fd2-2f943bcb4a77",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "delete_game",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -460,
+        100
+      ],
+      "id": "1d810a3c-711f-420b-801b-bfbc2e4a0f9a",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -20,
+        -100
+      ],
+      "id": "0af4f859-e4ff-44c3-afa9-ff4cca3fcc66",
+      "name": "Rspnd_Wh_game_list"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "m5z2SnDQm1xuXeRf",
+          "mode": "list",
+          "cachedResultName": "game_list"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "action": "game_list"
+          },
+          "matchingColumns": [
+            "action"
+          ],
+          "schema": [
+            {
+              "id": "action",
+              "displayName": "action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        -100
+      ],
+      "id": "765a32c7-8dbd-4d52-ba24-0630383cc5e4",
+      "name": "Exec_WF_game_list"
+    },
+    {
+      "parameters": {
+        "content": "## nueva partida \nLa nueva partida la gestiona el frontend mandándome a la pantalla de creación de personajes, donde aprovecharemos para recargar la lista de enemigos, una vez tenga su id de juego y de personaje, nos llevará  a la pantalla de juego, donde interactuaremos ya con el narrative controller.\n",
+        "height": 180,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        480
+      ],
+      "id": "1c42cd78-6ea5-4dbd-b6ce-6f44566f8959",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Lista de juegos \nDevuelve a frontend la lista de juegos. Frontend puede responder con un juego en especifico y la accion cargar juego para cargar juego."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        -120
+      ],
+      "id": "6972999a-36a5-4405-b5ef-531bdbfdb9f7",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Cargar partida \nLlamamos al load_game que se encargará de cargar la partida y devolver los parámetros de carga. Frontend guardará los datos y pasará a la pantalla de juego, desde donde se comunicará directamente con el narrative-controller. Además aprovecharemos este paso para recargar la lista de enemigos.\n",
+        "height": 180,
+        "width": 380
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        460,
+        60
+      ],
+      "id": "6a18a9b2-fd7d-450b-8f02-756f49608dd8",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -20,
+        100
+      ],
+      "id": "95431ece-41ac-4825-a3cf-69991b85f8ac",
+      "name": "carga_ok"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "A2hxy7Sc3OLe7XM4",
+          "mode": "list",
+          "cachedResultName": "load_game"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "action": "load_game",
+            "game_id": "={{ $json.body.game_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "action",
+              "displayName": "action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "game_id",
+              "displayName": "game_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        100
+      ],
+      "id": "e1254fdb-20b3-4ff9-985b-7c269ce76a06",
+      "name": "WF_load_game"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "UFQmGqrbBeuD4tIP",
+          "mode": "list",
+          "cachedResultName": "delete_character"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "action": "delete",
+            "game_id": "={{ $json.body.game_id }}",
+            "id_personaje": "={{ $json.body.id_personaje}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "action",
+              "displayName": "action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "game_id",
+              "displayName": "game_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "id_personaje",
+              "displayName": "id_personaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        300
+      ],
+      "id": "6b18a429-75b8-4831-8c8d-9e0b4a3b128d",
+      "name": "WF_delete_character"
+    },
+    {
+      "parameters": {
+        "content": "## Borrar partida\nDesde la pantalla de continuar partida se puede borrar una partida con un boton de borrado y confirmación. Una vez confirmado llamará a este subflujo que borrará la partida. El frontend irá entonces al menú principal.\n",
+        "height": 140,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ],
+      "id": "9bd4a5ab-22ea-4d38-b6ba-1566842ca99b",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Editar personaje\nDesde la pantalla de continuar partida se puede editar el nombre de un personaje con un boton de edición. Una vez pulsado el frontend me llevará a una pantalla de edicion donde llamará al subflujo edit_character que guiará al usuario durante el proceso. Al terminar el frontend volverá al menú principal.\n",
+        "height": 200,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        700
+      ],
+      "id": "68e6586a-1a70-4218-a8bc-d50eb7b44b6a",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -20,
+        300
+      ],
+      "id": "2e048307-2f3d-446e-b274-1b7cd91d232e",
+      "name": "WH_delete_ok"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "lum3mc4Ii5vIvKua",
+          "mode": "list",
+          "cachedResultName": "update_enemy_list"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "update_enemy_list": "update_enemy_list"
+          },
+          "matchingColumns": [
+            "update_enemy_list"
+          ],
+          "schema": [
+            {
+              "id": "update_enemy_list",
+              "displayName": "update_enemy_list",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        100
+      ],
+      "id": "b62a067f-3bdc-483c-b5e7-dc4dcac716d9",
+      "name": "WF_update_enemy_list"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Exec_WF_game_list",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "WF_load_game",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "WF_delete_character",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exec_WF_game_list": {
+      "main": [
+        [
+          {
+            "node": "Rspnd_Wh_game_list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WF_load_game": {
+      "main": [
+        [
+          {
+            "node": "carga_ok",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WF_delete_character": {
+      "main": [
+        [
+          {
+            "node": "WH_delete_ok",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "carga_ok": {
+      "main": [
+        [
+          {
+            "node": "WF_update_enemy_list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a101aa6f-2551-40ac-9f1c-1d0362f6f2af",
+  "meta": {
+    "instanceId": "eb8a1f649dcbecdbbf9304f18748ad20873c85400d0ffd3afe2830b61cab1c41"
+  },
+  "id": "uVE9RmpmMI6eIGi3",
+  "tags": []
+}

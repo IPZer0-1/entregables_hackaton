@@ -1,0 +1,193 @@
+{
+  "name": "delete_character",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "action"
+            },
+            {
+              "name": "game_id"
+            },
+            {
+              "name": "id_personaje",
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -640,
+        -360
+      ],
+      "id": "37d1732d-3a0a-4b91-8ce2-16d44b505e23",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a079aeba-3a98-4b6c-929e-5e323c3c2dcd",
+              "name": "action",
+              "value": "={{ $('When Executed by Another Workflow').item.json.action }}",
+              "type": "string"
+            },
+            {
+              "id": "1fc7728c-6a41-47f9-9ce0-a84da209482d",
+              "name": "game_id",
+              "value": "={{ $('When Executed by Another Workflow').item.json.game_id }}",
+              "type": "string"
+            },
+            {
+              "id": "2f7b3127-182b-48d3-8e2e-173826ad6537",
+              "name": "id_personaje",
+              "value": "={{ $('When Executed by Another Workflow').item.json.id_personaje }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -420,
+        -360
+      ],
+      "id": "33d88914-29b9-428b-af6d-1a97834ae2ba",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "deleteTable",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "game_states",
+          "mode": "list",
+          "cachedResultName": "game_states"
+        },
+        "deleteCommand": "delete",
+        "where": {
+          "values": [
+            {
+              "column": "game_id",
+              "value": "={{ $json.game_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -200,
+        -360
+      ],
+      "id": "9806ab28-29ee-4d19-8cee-1a58a0e6994b",
+      "name": "Postgres_delete_game",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteTable",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "personajes",
+          "mode": "list",
+          "cachedResultName": "personajes"
+        },
+        "deleteCommand": "delete",
+        "where": {
+          "values": [
+            {
+              "column": "id_personaje",
+              "value": "={{ $json.id_personaje }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        20,
+        -360
+      ],
+      "id": "115ed1d6-cf3d-4154-8131-285c3c3674df",
+      "name": "Postgres_delete_char",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Postgres_delete_game",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres_delete_game": {
+      "main": [
+        [
+          {
+            "node": "Postgres_delete_char",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "786c7b86-70be-4384-ba1b-5d9ed60bc488",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "eb8a1f649dcbecdbbf9304f18748ad20873c85400d0ffd3afe2830b61cab1c41"
+  },
+  "id": "UFQmGqrbBeuD4tIP",
+  "tags": []
+}

@@ -1,0 +1,1030 @@
+{
+  "name": "edit_character",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatinput }}",
+        "options": {
+          "systemMessage": "Eres un creador de personajes experto en juegos de rol. \nAyuda al jugador a editar su personaje solo se le permite cambiar su nombre.\nPor lo que le harás una sola pregunta: \n-¿Quieres cambiar el nombre de tu personaje? \n\nSobre las respuestas: \n-No permitas ninguna palabra malsonante como nombre. \n-No permitas ningún carácter especial que no sea el \"-\" o el \"_\".\n-Si el jugador pone espacios en el nombre, pon \"_\" en su lugar.\n-Confirma con el usuario las respuestas\n\nCuando haya confirmado el usuario, responde con la frase \"Edición completa\" y no uses esta frase bajo ninguna otra circunstancia."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -1200,
+        340
+      ],
+      "id": "f0e41108-34bc-4bdb-a4bb-33e055be353d",
+      "name": "AI Character Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields').item.json.session_name }}",
+        "tableName": "n8n_chat_characters"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -1080,
+        540
+      ],
+      "id": "dc3f353f-9eaf-4c0d-87b1-5c38eed23405",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        540
+      ],
+      "id": "67d35122-fb21-4aad-baca-d361f7dc5bbf",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1240,
+        540
+      ],
+      "id": "1cbddff1-5117-4044-ab6a-7ca0c216cc9e",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "3OuBtjZj9GbiCGfk",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -300,
+        460
+      ],
+      "id": "b08c92a2-ae14-45f6-b6a8-e267ea74406b",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f8565a27-90cb-4c96-948b-286f3f732e14",
+              "name": "action",
+              "value": "start_edit",
+              "type": "string"
+            },
+            {
+              "id": "5db8969e-9dd2-4ecc-8fc5-b85c2d7dae88",
+              "name": "chatinput",
+              "value": "={{ $json.body.message }}",
+              "type": "string"
+            },
+            {
+              "id": "d042c7b0-d0bd-4daa-ad7e-e4229f0fabcc",
+              "name": "session_name",
+              "value": "={{ $json.body.chat_id }}",
+              "type": "string"
+            },
+            {
+              "id": "2b182a88-5412-4965-bd42-a4debbe3d7eb",
+              "name": "id_personaje",
+              "value": "={{ $json.body.id_personaje }}",
+              "type": "string"
+            },
+            {
+              "id": "80d46289-999e-4a94-b51c-19f50e7c276b",
+              "name": "game_id",
+              "value": "={{ $json.body.game_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1460,
+        220
+      ],
+      "id": "060d3ab7-1af3-4aec-8569-2c235785ad8e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "personajes",
+          "mode": "list",
+          "cachedResultName": "personajes"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id_personaje": "={{ $('Edit Fields').item.json.id_personaje }}",
+            "nombre": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nombre', `El nuevo nombre del personaje que haya elegido.`, 'string') }}"
+          },
+          "matchingColumns": [
+            "id_personaje"
+          ],
+          "schema": [
+            {
+              "id": "id_personaje",
+              "displayName": "id_personaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "game_id",
+              "displayName": "game_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "descripcion",
+              "displayName": "descripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "trasfondo",
+              "displayName": "trasfondo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fuerza",
+              "displayName": "fuerza",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "destreza",
+              "displayName": "destreza",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "constitucion",
+              "displayName": "constitucion",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "inteligencia",
+              "displayName": "inteligencia",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "sabiduria",
+              "displayName": "sabiduria",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "carisma",
+              "displayName": "carisma",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "puntos_vida",
+              "displayName": "puntos_vida",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fecha_creacion",
+              "displayName": "fecha_creacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nivel",
+              "displayName": "nivel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "puntos_experiencia",
+              "displayName": "puntos_experiencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "defensa_fuerza",
+              "displayName": "defensa_fuerza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "defensa_destreza",
+              "displayName": "defensa_destreza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "defensa_constitucion",
+              "displayName": "defensa_constitucion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "defensa_inteligencia",
+              "displayName": "defensa_inteligencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "defensa_sabiduria",
+              "displayName": "defensa_sabiduria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "defensa_carisma",
+              "displayName": "defensa_carisma",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "defensa_armadura",
+              "displayName": "defensa_armadura",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "bono_armadura",
+              "displayName": "bono_armadura",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "espacios_disponibles",
+              "displayName": "espacios_disponibles",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        -500,
+        -180
+      ],
+      "id": "a70abb4b-dddf-4ad6-90b9-75d9d512f090",
+      "name": "Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1460,
+        420
+      ],
+      "id": "ca3db092-976a-4cd4-8f50-5666b4433ece",
+      "name": "When chat message received",
+      "webhookId": "1a19ff58-d14c-4a03-bf2d-ad0bdea3dcb0",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[\n\t{\n\t\t\"nombre\":\"nuevo_nombre\"\n\t}\n]\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -820,
+        -180
+      ],
+      "id": "1d9721d8-4675-40e5-b3ad-e04c627aabd9",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c3b22bff-7d32-44ad-bd9c-f3fe71dc385b",
+              "leftValue": "={{ $json.messages.toLowerCase().includes('edición completa')}}",
+              "rightValue": "=true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -360,
+        160
+      ],
+      "id": "66c3dbcd-1085-46dc-a904-d587e614b768",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        -920,
+        60
+      ],
+      "id": "c6aa34c0-cfc7-46dc-a7a0-237b7a4927ff",
+      "name": "Chat Memory Manager"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Chat Memory Manager').item.json.messages }}",
+        "hasOutputParser": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        -1000,
+        -400
+      ],
+      "id": "aa6e7b62-e2b4-4796-aef4-12b0e191ed0c",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1000,
+        -180
+      ],
+      "id": "401af2b6-4d09-4391-8f0a-b62a3707b291",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "3OuBtjZj9GbiCGfk",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0b731487-d8ed-4e0e-a289-28c311b35076",
+              "name": "messages",
+              "value": "={{ $json.messages[$json.messagesCount-1].ai }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -540,
+        160
+      ],
+      "id": "b37873c2-ca86-400a-adf6-66ec5a43c40a",
+      "name": "último_mensaje"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Eres el encargado de guardar en la base de datos el nuevo personaje y la nueva partida. Para ello usaras las herramientas que te proporciono y respetaras siempre el formato adecuado.\n\n-La entrada vendrá ya en un formato adecuado, pero hay revisarla y corregirla en caso de ser necesario.\n\n-Es totalmente imperativo que guardes en la base de datos una sola vez.\n\n-Guarda la partida en la base de datos usando la herramienta Postgres que te proporciono, y luego emite la salida en base a la misma salida de esa misma heramienta."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -660,
+        -400
+      ],
+      "id": "222eca1f-4b7b-4d41-abae-598868741390",
+      "name": "AI Character Save"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -660,
+        -180
+      ],
+      "id": "98405a16-3826-416f-9e8f-15df0b125571",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "3OuBtjZj9GbiCGfk",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        -380,
+        -180
+      ],
+      "id": "a4adfe4f-3bfa-49b6-a356-0e94921b263a",
+      "name": "Calculator1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTimeTool",
+      "typeVersion": 2,
+      "position": [
+        -260,
+        -180
+      ],
+      "id": "358c1571-408d-4aff-80c5-90e5deb57548",
+      "name": "Date_Time"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -100,
+        -400
+      ],
+      "id": "752784ad-6e36-4243-bceb-64648126f853",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "edit_char_controller",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1660,
+        220
+      ],
+      "id": "3f7cfb63-c300-4e46-ad69-7fa04ffcc35d",
+      "name": "Webhook",
+      "webhookId": "15189bda-a777-4937-aff4-143be9289bb8"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "useDataOfInput": 2
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -740,
+        460
+      ],
+      "id": "75c2cfac-d48e-44ea-a1eb-7725ff72cfd6",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "59d06d84-6c54-4e56-b142-5ea72bf84466",
+              "name": "response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "015c0ce4-9d71-4042-91a2-b82db51b34dc",
+              "name": "type",
+              "value": "narrative",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        460
+      ],
+      "id": "ace0dfe7-d327-404e-8389-371d1b6f6a41",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0138c9f-1960-4eb1-9d7e-b15e517f3ddf",
+              "name": "response",
+              "value": "char_end",
+              "type": "string"
+            },
+            {
+              "id": "da8413ef-7c07-459a-98ae-5ed1b02dfe5f",
+              "name": "type",
+              "value": "system",
+              "type": "string"
+            },
+            {
+              "id": "e5df40b3-0eb2-4f03-9314-0f28ef212499",
+              "name": "game_id",
+              "value": "={{ $json.output[0].game_id }}",
+              "type": "string"
+            },
+            {
+              "id": "2fd8326f-d331-4d92-a822-248758fead3c",
+              "name": "id_personaje",
+              "value": "={{ $json.output[0].id_personaje }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -300,
+        -400
+      ],
+      "id": "686ee08a-a1e4-42fa-8453-138bd1534fef",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[\n\t{\n\t\t\"game_id\": \"partida_1742734126208\",\n\t\t\"id_personaje\": 1\n\t}\n]\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -120,
+        -180
+      ],
+      "id": "5236dd96-fea5-4fbd-9cdf-63214c5b3ec1",
+      "name": "Structured Output Parser1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Character Agent": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory Manager",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Character Agent",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Chat Memory Manager",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Character Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Character Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Character Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Character Save",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Character Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory Manager": {
+      "main": [
+        [
+          {
+            "node": "último_mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "AI Character Save",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "último_mensaje": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Character Save": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Character Save",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Character Save",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date_Time": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Character Save",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Character Save",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "20fc9a66-513f-4666-8e9d-bbb5c930212f",
+  "meta": {
+    "instanceId": "eb8a1f649dcbecdbbf9304f18748ad20873c85400d0ffd3afe2830b61cab1c41"
+  },
+  "id": "LQEpdFXHy7MLsUwm",
+  "tags": []
+}

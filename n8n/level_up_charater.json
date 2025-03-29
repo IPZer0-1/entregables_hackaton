@@ -1,0 +1,661 @@
+{
+  "name": "level_up_charater",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "action"
+            },
+            {
+              "name": "id_personaje"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -360,
+        20
+      ],
+      "id": "53f974e6-b18c-4100-b7cd-d5250bb77d49",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=sube un nivel al personaje con id_personaje:{{ $json.id_personaje }}",
+        "options": {
+          "systemMessage": "Eres la IA encargada exclusivamente de subir de nivel a los personajes. Tu tarea será recuperar la información de un personaje concreto, utilizando la herramienta select_char, y subirlo de nivel utilizando siempre la herramienta wf_rules_controller que te proporciono para consultar las reglas de subida de nivel para personajes.\n\n-Los campos fuerza, destreza, constitucion, inteligencia, sabiduria o carisma se denominan en el juego habilidades o características.\n\n-Solo puedes mejorar un máximo de 3 habilidades o características.\n\n-Los valores máximos de una habilidad o característica es 10.\n\n-Debes consultar la base de datos para saber el estado previo a la subida de nivel del personaje, para ello usa la herramienta select_char.\n\n-Debes consultar las reglas antes de hacer ningún cambio en la base de datos, para ello utiliza la herramienta wf_rules_controller.\n\n-Subir de nivel significa que el personaje mejora a base de acumular puntos de experiencia, cada 1000 puntos se sube un nivel. Cuando esto ocurre, este personaje pasa a un nivel inmediatamente superior. Por ejemplo, de nivel 2 pasaría a nivel 3. \n\n-Solo puedes cambiar los campos según te permitan las reglas. Lee el apartado de subida de nivel y entiende bien el proceso. \n\n-Elige, en base al trasfondo del personaje, que habilidades mejoran de entre la fuerza, destreza, constitucion, inteligencia, sabiduria o carisma, pero siempre siguiendo que las reglas de subida de nivel te exigen subir 3 y solo 3 habilidades y solamente un punto cada una.\n\n-Recueda que el campo espacios_disponibles es igual al campo defensa_constitucion."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        120,
+        20
+      ],
+      "id": "e9f83c2e-65a9-4271-bdcf-39bf3b312011",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        60,
+        240
+      ],
+      "id": "fbe0f639-aa36-4e56-b90d-2f9ba4b2bdc3",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "3OuBtjZj9GbiCGfk",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "personajes",
+          "mode": "list",
+          "cachedResultName": "personajes"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha_creacion": "={{ $now }}",
+            "id_personaje": "={{ $('When Executed by Another Workflow').item.json.id_personaje }}",
+            "fuerza": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fuerza', `Los campos, fuerza, destreza, constitucion, inteligencia, sabiduria y carisma pueden subir uno o quedarse como están pero máximo solo pueden subir 3 de ellos.`, 'number') }}",
+            "destreza": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('destreza', `Los campos, fuerza, destreza, constitucion, inteligencia, sabiduria y carisma pueden subir uno o quedarse como están pero máximo solo pueden subir 3 de ellos.`, 'number') }}",
+            "constitucion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('constitucion', `Los campos, fuerza, destreza, constitucion, inteligencia, sabiduria y carisma pueden subir uno o quedarse como están pero máximo solo pueden subir 3 de ellos.`, 'number') }}",
+            "inteligencia": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('inteligencia', `Los campos, fuerza, destreza, constitucion, inteligencia, sabiduria y carisma pueden subir uno o quedarse como están pero máximo solo pueden subir 3 de ellos.`, 'number') }}",
+            "sabiduria": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('sabiduria', `Los campos, fuerza, destreza, constitucion, inteligencia, sabiduria y carisma pueden subir uno o quedarse como están pero máximo solo pueden subir 3 de ellos.`, 'number') }}",
+            "carisma": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('carisma', `Los campos, fuerza, destreza, constitucion, inteligencia, sabiduria y carisma pueden subir uno o quedarse como están pero máximo solo pueden subir 3 de ellos.`, 'number') }}",
+            "puntos_vida": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('puntos_vida', `Estos son los puntos de vida máximos del personaje.`, 'number') }}",
+            "nivel": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('nivel', `Suma uno al valor que ya tuviera.`, 'number') }}",
+            "puntos_experiencia": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('puntos_experiencia', `Este campo será equivalente al nivel del personaje que ya tuviera mas uno y multiplicado después por mil.`, 'number') }}",
+            "defensa_fuerza": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('defensa_fuerza', `Este valor vale siempre el valor de fuerza+10`, 'number') }}",
+            "defensa_destreza": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('defensa_destreza', `Este valor vale siempre el valor de destreza+10`, 'number') }}",
+            "defensa_constitucion": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('defensa_constitucion', `Este valor vale siempre el valor de constitucion+10`, 'number') }}",
+            "defensa_inteligencia": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('defensa_inteligencia', `Este valor vale siempre el valor de inteligencia+10`, 'number') }}",
+            "defensa_sabiduria": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('defensa_sabiduria', `Este valor vale siempre el valor de sabiduria+10`, 'number') }}",
+            "defensa_carisma": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('defensa_carisma', `Este valor vale siempre el valor de carisma+10`, 'number') }}",
+            "espacios_disponibles": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('espacios_disponibles', `Este valor vale siempre el valor de constitucion+10`, 'number') }}"
+          },
+          "matchingColumns": [
+            "id_personaje"
+          ],
+          "schema": [
+            {
+              "id": "id_personaje",
+              "displayName": "id_personaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "game_id",
+              "displayName": "game_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "descripcion",
+              "displayName": "descripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "trasfondo",
+              "displayName": "trasfondo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fuerza",
+              "displayName": "fuerza",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "destreza",
+              "displayName": "destreza",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "constitucion",
+              "displayName": "constitucion",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "inteligencia",
+              "displayName": "inteligencia",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sabiduria",
+              "displayName": "sabiduria",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "carisma",
+              "displayName": "carisma",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "puntos_vida",
+              "displayName": "puntos_vida",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha_creacion",
+              "displayName": "fecha_creacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nivel",
+              "displayName": "nivel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "puntos_experiencia",
+              "displayName": "puntos_experiencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "defensa_fuerza",
+              "displayName": "defensa_fuerza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "defensa_destreza",
+              "displayName": "defensa_destreza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "defensa_constitucion",
+              "displayName": "defensa_constitucion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "defensa_inteligencia",
+              "displayName": "defensa_inteligencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "defensa_sabiduria",
+              "displayName": "defensa_sabiduria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "defensa_carisma",
+              "displayName": "defensa_carisma",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "defensa_armadura",
+              "displayName": "defensa_armadura",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "bono_armadura",
+              "displayName": "bono_armadura",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "espacios_disponibles",
+              "displayName": "espacios_disponibles",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        620,
+        260
+      ],
+      "id": "687c3165-11c3-44b7-866f-e6524a1247d7",
+      "name": "level_up_char",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "personajes",
+          "mode": "list",
+          "cachedResultName": "personajes"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "id_personaje",
+              "value": "={{ $json.id_personaje }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -140,
+        20
+      ],
+      "id": "57934c73-40fd-46fb-b586-5f100752df80",
+      "name": "Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"estado_juego\": {\n\t\t\t\"eventos\": \n\t\t\t\t[\"Entró al bosque\",\"Encontró una cueva\"],\n\t\t\t\"puntos_de_vida\": 20,\n\t\t\t\"fuerza\":10,\n\t\t\t\"destreza\":10,\n\t\t\t\"inteligencia\":10,\n\t\t\t\"clase\":\"Explorador\",\n\t\t\t\"ubicacion_actual\":\"Bosque Oscuro\"\t\n\t\t\t}\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -380,
+        540
+      ],
+      "id": "46edcb32-1702-4399-a21a-2df0bf8138a7",
+      "name": "Structured Output Parser",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "name": "knave_rules",
+        "description": "Utiliza esta herramienta para consultar las reglas de subida de nivel del juego de rol Knave.",
+        "workflowId": {
+          "__rl": true,
+          "value": "QWaAndbRR3TTphfF",
+          "mode": "list",
+          "cachedResultName": "rules_controller"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query_rules": "query_rules",
+            "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "query_rules",
+              "displayName": "query_rules",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.1,
+      "position": [
+        280,
+        260
+      ],
+      "id": "35dfa419-5dc3-405e-8745-252e149b88a9",
+      "name": "WF_rules_controller"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * from personajes WHERE id_personaje=4;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -400,
+        720
+      ],
+      "id": "83e8e6ff-a64d-479f-b350-c47ae2626399",
+      "name": "Postgres1",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "personajes",
+          "mode": "list",
+          "cachedResultName": "personajes"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "id_personaje",
+              "value": "={{ $('When Executed by Another Workflow').item.json.id_personaje }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        440,
+        260
+      ],
+      "id": "39508cd2-399f-418c-b100-0784428bedb0",
+      "name": "select_char",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Postgres').item.json.id_personaje }}",
+        "tableName": "n8n_chat_char",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        140,
+        380
+      ],
+      "id": "511c96fc-e738-4677-a835-67d797a7b498",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "action": null,
+          "id_personaje": "4"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Postgres",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "level_up_char": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        []
+      ]
+    },
+    "WF_rules_controller": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "select_char": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "90a6bed2-55e9-47f0-8b64-9f2359d25b7a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "eb8a1f649dcbecdbbf9304f18748ad20873c85400d0ffd3afe2830b61cab1c41"
+  },
+  "id": "RLsk5lDqG1ryy5Bt",
+  "tags": []
+}

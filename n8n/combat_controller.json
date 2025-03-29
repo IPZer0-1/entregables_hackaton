@@ -1,0 +1,720 @@
+{
+  "name": "combat_controller",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message }}",
+        "options": {
+          "systemMessage": "Eres el encargado de gestionar el combate del juego de rol Knaves. El game master te pasará dos parámetros. el id_personaje y la acción del jugador en cada turno. Deberás gestionar cada turno para llevar el combate a su fin.\n\nDebes iniciar el combate, llevarlo a su termino e informar del resultado. \n\nAl final de cada ronda de combate, deberás guardar el estado del personaje usando la herramienta update_char_combat.\n\nAl final del combate deberás actualizar el estado del personaje añadiendo la experiencia obtenido por el mounstruo.\n\n-Solo puedes usar las reglas del juego de rol Knaves.\n-El combate acaba cuando el enemigo o el jugador es derrotado. Cuando eso ocurra salvarás el estado del personaje e informarás al Game_master.\n-Las reglas del juego de rol Knaves las tienes accesibles en la herramienta Reglas_Knaves.\n-Utiliza la herramienta dice para realizar tiradas de dados, debes pasarle un JSON con esta estructura:{\"roll\": \"4d8\"}\n-Utiliza la herramienta update_char_combat para actualizar el estado del personaje. Deberás usarla en dos momentos. \n -Al final de la acción del enemigo, para actualizar sus puntos de vida restantes.\n -Al final del combate, para sumar la experiencia ganada por ese enemigo.\n-Utiliza la herramienta current_enemy para saber las estadísticas del enemigo con el que el jugador está luchando.\n-Utiliza la herramienta get_char_information para obtener el estado \nactual del personaje, puntos de vida y característica de combate.\n\n-Debes responderle al game master con el resultado de cada turno."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        880,
+        0
+      ],
+      "id": "813d4107-697e-4666-ba29-3ad2ca8f8587",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        420,
+        220
+      ],
+      "id": "ec0d4b09-a5a2-4ba5-bdbb-6a14f108ab7e",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "3OuBtjZj9GbiCGfk",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=combat_{{ $('Edit Fields').item.json.id_personaje }}",
+        "tableName": "n8n_chat_combat",
+        "contextWindowLength": 30
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        220
+      ],
+      "id": "bec8c585-d9bd-435e-ade4-4c76f476c70d",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-large",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        640,
+        400
+      ],
+      "id": "0246938d-6abf-4ce4-adcb-f529802f3911",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "3OuBtjZj9GbiCGfk",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        976,
+        220
+      ],
+      "id": "6af4cd8b-3aee-43b6-a8f3-c8c34f1f8b4c",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "name": "Dice",
+        "description": "Usa esta herramienta para recibir el resultado de una tirada de dados",
+        "workflowId": {
+          "__rl": true,
+          "value": "tjPyqCyAN1k3ipPX",
+          "mode": "list",
+          "cachedResultName": "Dice_controller"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "roll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('roll', `envía aquí la cadena con la tirada. Por ejemplo: 3d6`, 'string') }}"
+          },
+          "matchingColumns": [
+            "roll"
+          ],
+          "schema": [
+            {
+              "id": "roll",
+              "displayName": "roll",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.1,
+      "position": [
+        1096,
+        220
+      ],
+      "id": "eba43116-300d-44b9-9ab1-113b41b74553",
+      "name": "Dice"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "personajes",
+          "mode": "list",
+          "cachedResultName": "personajes"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "puntos_vida": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('puntos_vida', `Este campo se rellena restando a los puntos_vida que tuviera el daño realizado en la ronda de combate.`, 'number') }}",
+            "id_personaje": "={{ $('Edit Fields').item.json.id_personaje }}",
+            "puntos_experiencia": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('puntos_experiencia', `Mientras el combate está en marcha, este valor no cambiará. Una vez el combate está terminado se le suma el valor de xp del monstruo derrotado.`, 'number') }}"
+          },
+          "matchingColumns": [
+            "id_personaje"
+          ],
+          "schema": [
+            {
+              "id": "id_personaje",
+              "displayName": "id_personaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "game_id",
+              "displayName": "game_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nombre",
+              "displayName": "nombre",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "descripcion",
+              "displayName": "descripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "trasfondo",
+              "displayName": "trasfondo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fuerza",
+              "displayName": "fuerza",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "destreza",
+              "displayName": "destreza",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "constitucion",
+              "displayName": "constitucion",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "inteligencia",
+              "displayName": "inteligencia",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "sabiduria",
+              "displayName": "sabiduria",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "carisma",
+              "displayName": "carisma",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "puntos_vida",
+              "displayName": "puntos_vida",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha_creacion",
+              "displayName": "fecha_creacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "nivel",
+              "displayName": "nivel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "puntos_experiencia",
+              "displayName": "puntos_experiencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "defensa_fuerza",
+              "displayName": "defensa_fuerza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "defensa_destreza",
+              "displayName": "defensa_destreza",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "defensa_constitucion",
+              "displayName": "defensa_constitucion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "defensa_inteligencia",
+              "displayName": "defensa_inteligencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "defensa_sabiduria",
+              "displayName": "defensa_sabiduria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "defensa_carisma",
+              "displayName": "defensa_carisma",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "defensa_armadura",
+              "displayName": "defensa_armadura",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "bono_armadura",
+              "displayName": "bono_armadura",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "espacios_disponibles",
+              "displayName": "espacios_disponibles",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        1200,
+        400
+      ],
+      "id": "01bd6090-bab2-4d89-a6c7-576d80438875",
+      "name": "update_char_combat",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "id_personaje",
+              "type": "number"
+            },
+            {
+              "name": "message"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        0
+      ],
+      "id": "c7c2ac93-c73c-4f34-9476-f9b51401937f",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d7b1d7db-591c-4c5b-9633-0925b7749ad0",
+              "name": "id_personaje",
+              "value": "={{ $json.id_personaje }}",
+              "type": "string"
+            },
+            {
+              "id": "52b49411-51df-450e-b2ff-005bfbaeba5f",
+              "name": "message",
+              "value": "={{ $json.message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        620,
+        0
+      ],
+      "id": "fdd58ae3-bfb6-4d47-84d5-86f92c4008b5",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "enemigos_actuales",
+          "mode": "list",
+          "cachedResultName": "enemigos_actuales"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        1360,
+        400
+      ],
+      "id": "793c2ef0-30c6-4133-a2a6-9caed00433c3",
+      "name": "current_enemy",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Obtener informacion del personaje del jugador.",
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "personajes",
+          "mode": "list",
+          "cachedResultName": "personajes"
+        },
+        "where": {
+          "values": [
+            {
+              "column": "id_personaje",
+              "value": "={{ $('Edit Fields').item.json.id_personaje }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.5,
+      "position": [
+        1040,
+        400
+      ],
+      "id": "1dca8a4b-0b4d-46b0-a9be-a082f3db8047",
+      "name": "get_char_information",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "Reglas_Knaves",
+        "toolDescription": "Provee de todo el conjunto de reglas para el juego Knave. Incluidas las de combate.",
+        "tableName": "knave_n8n_vectors",
+        "topK": 6,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "typeVersion": 1,
+      "position": [
+        680,
+        222.5
+      ],
+      "id": "7b882b51-3a1f-4fd7-8116-907dc81fd175",
+      "name": "Reglas_Knaves",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Edit Fields": [
+      {
+        "json": {
+          "id_personaje": 1,
+          "message": "Ataco con la espada"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Reglas_Knaves",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dice": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_char_combat": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "current_enemy": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_char_information": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reglas_Knaves": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a4dabca0-bddd-4410-b400-8fa9e22c983e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "eb8a1f649dcbecdbbf9304f18748ad20873c85400d0ffd3afe2830b61cab1c41"
+  },
+  "id": "VFbBv8cUZe7ea4xU",
+  "tags": []
+}

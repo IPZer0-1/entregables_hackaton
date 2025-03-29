@@ -1,0 +1,165 @@
+{
+  "name": "load_game",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "action"
+            },
+            {
+              "name": "game_id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9216268c-02c8-47a2-9cf9-16ea517b703e",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7ef7843e-aef3-470c-896a-948ef4c22e13",
+              "name": "game_id",
+              "value": "={{ $json.game_id }}",
+              "type": "string"
+            },
+            {
+              "id": "bb801858-367e-4507-ac6a-44b6b9d6df60",
+              "name": "estado_juego",
+              "value": "={{ $json.estado_juego }}",
+              "type": "object"
+            },
+            {
+              "id": "da515457-4d26-4229-9a26-7c9800473f58",
+              "name": "estado_juego.ubicacion_actual",
+              "value": "={{ $json.estado_juego.ubicacion_actual }}",
+              "type": "string"
+            },
+            {
+              "id": "6a80cb73-da55-44ca-a49e-b7140713941d",
+              "name": "fecha_creacion",
+              "value": "={{ $json.fecha_creacion }}",
+              "type": "string"
+            },
+            {
+              "id": "e48df75d-0229-4543-a731-41c74c14e097",
+              "name": "descripcion",
+              "value": "={{ $json.descripcion }}",
+              "type": "string"
+            },
+            {
+              "id": "e4e6d571-6ea5-4aaa-ad31-b1ec8d3430fa",
+              "name": "id_personaje",
+              "value": "={{ $json.id_personaje }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        440,
+        0
+      ],
+      "id": "be0ec539-0cfe-4c19-ba48-3da3af0cf42d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "game_states",
+          "mode": "list",
+          "cachedResultName": "game_states"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "game_id",
+              "value": "={{ $json.game_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        220,
+        0
+      ],
+      "id": "5c9e78b6-32f8-437f-876e-fa6c88f8e187",
+      "name": "Postgres_game_state",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "action": null,
+          "game_id": "partida_1743197802356"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Postgres_game_state",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres_game_state": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e730d3b0-cab1-436f-bbda-76c2628a955c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "eb8a1f649dcbecdbbf9304f18748ad20873c85400d0ffd3afe2830b61cab1c41"
+  },
+  "id": "A2hxy7Sc3OLe7XM4",
+  "tags": []
+}

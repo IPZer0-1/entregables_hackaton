@@ -1,0 +1,127 @@
+{
+  "name": "game_list",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT *\nFROM game_states\nORDER BY fecha_creacion DESC;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -520,
+        -100
+      ],
+      "id": "016ebf0f-3a69-4f72-96b5-2938828ea6a5",
+      "name": "Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "btcvao5zoGI73Y56",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "11eca8f5-3c05-414c-85d3-6ea861d01966",
+              "name": "game_id",
+              "value": "={{ $json.game_id }}",
+              "type": "string"
+            },
+            {
+              "id": "27cbeb37-01c7-4d6a-a56c-741f1e3a883c",
+              "name": "descripcion",
+              "value": "={{ $json.descripcion }}",
+              "type": "string"
+            },
+            {
+              "id": "cf889c45-dda5-40ef-975e-13cb7d440143",
+              "name": "fecha_creacion",
+              "value": "={{ $json.fecha_creacion }}",
+              "type": "string"
+            },
+            {
+              "id": "e4a43f0b-b8bf-4371-b76d-e7a1c387be6c",
+              "name": "id_personaje",
+              "value": "={{ $json.id_personaje }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -300,
+        -100
+      ],
+      "id": "b4d4c711-722a-46ba-b501-077a22fe0dda",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "action"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -740,
+        -100
+      ],
+      "id": "5fec9e2d-02da-43f1-ad7d-dbe24d9c4a16",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Postgres": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Postgres",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2bca6da9-b77c-40ed-b0c9-1306e077e858",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "eb8a1f649dcbecdbbf9304f18748ad20873c85400d0ffd3afe2830b61cab1c41"
+  },
+  "id": "m5z2SnDQm1xuXeRf",
+  "tags": []
+}

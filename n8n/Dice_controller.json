@@ -1,0 +1,103 @@
+{
+  "name": "Dice_controller",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "roll"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        20
+      ],
+      "id": "7dfcd313-521a-4cea-8734-40f1ea8caf2d",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Este código genera tiradas de dados basadas en la entrada proporcionada por N8N.\n\n// Recibe los datos de entrada desde N8N, se espera un array con un objeto que contiene 'roll' con formato 'XdY' (ej: '3d6')\nconst rollInput = $input.first().json.roll;\n\n// Validamos que la entrada tiene el formato adecuado\nif (!/^[0-9]+d[0-9]+$/.test(rollInput)) {\n    throw new Error(\"Formato inválido. Usa el formato 'XdY', por ejemplo '3d6'.\");\n}\n\n// Separamos el número de dados y el tipo de dado\nconst [numberOfDice, diceType] = rollInput.toLowerCase().split('d').map(Number);\n\n// Inicializamos un array para guardar los resultados individuales de cada dado y una variable para la suma total\nconst results = [];\nlet total = 0;\n\n// Bucle que genera los resultados de cada tirada\nfor (let i = 0; i < numberOfDice; i++) {\n    const roll = Math.floor(Math.random() * diceType) + 1; // Genera un número aleatorio entre 1 y el tipo de dado\n    results.push(roll); // Añade el resultado al array de resultados\n    total += roll; // Suma el resultado al total\n}\n\n// Devuelve los resultados y el total como un array de objetos que N8N pueda interpretar\nreturn [{\n    json: {\n        results: results, // Array con cada tirada individual\n        total: total // Suma total de todas las tiradas\n    }\n}];\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        20
+      ],
+      "id": "a0f7ef64-b151-423c-aa7a-2c35f697d5c6",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "67f26234-b6e5-4221-9e4e-ae3aa8c5a920",
+              "name": "roll",
+              "value": "={{ $json.roll }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        20
+      ],
+      "id": "b3b85d56-b63d-4b20-a25e-17cce0814f88",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {
+    "Edit Fields": [
+      {
+        "json": {
+          "roll": "3d6"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5b90a5e3-21f7-4e7b-90d6-29cb28f338fd",
+  "meta": {
+    "instanceId": "eb8a1f649dcbecdbbf9304f18748ad20873c85400d0ffd3afe2830b61cab1c41"
+  },
+  "id": "tjPyqCyAN1k3ipPX",
+  "tags": []
+}
